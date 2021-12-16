@@ -45,7 +45,9 @@ public class AgentDataPrinter : MonoBehaviour {
         hungerSlider.value = (float) agent.stats.GetNeed(Need.Hunger);
         thirstSlider.value = (float) agent.stats.GetNeed(Need.Thirst);
         repSlider.value = (float) agent.stats.GetNeed(Need.ReproductiveUrge);
-        agentSpecies.GetComponent<Text>().text = agent.ToString();
+        var agentString = agent.ToString();
+        if (agentString.Equals("Fox"))
+            agentSpecies.GetComponent<Text>().text = "";
         age.GetComponent<Text>().text = "Age: " + agent.GetAge().Round(0);
         sleep.GetComponent<Text>().text = "Sleep: " + agent.stats.GetNeed(Need.Sleep).Round(5);
         hunger.GetComponent<Text>().text = "Hunger: " + agent.stats.GetNeed(Need.Hunger).Round(5);
