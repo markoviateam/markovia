@@ -6,15 +6,25 @@ using Random = UnityEngine.Random;
 using System.Runtime.Serialization;
 using System.IO;
 using System.Linq;
+using MathNet.Numerics.LinearAlgebra;
 using SFB;
+using UnityEngine.AI;
 
 public class AgentSpawner : MonoBehaviour, ISerializable {
+    public static Boolean isDesert = false;
+
     private static Dictionary<Species, GameObject> speciesPrefabsStatic = new Dictionary<Species, GameObject>();
     private Dictionary<Species, List<Vector3>> NonMovableAgentsPositions = new Dictionary<Species, List<Vector3>>();
     private Dictionary<Species, HashSet<Agent>> InGameAgents = new Dictionary<Species, HashSet<Agent>>();
 
-    public SerializableDictionary<Species, GameObject> speciesPrefabs = new SerializableDictionary<Species, GameObject>();
+    public SerializableDictionary<Species, GameObject> speciesPrefabs =
+        new SerializableDictionary<Species, GameObject>();
 
+    public SerializableDictionary<Species, GameObject> speciesPrefabsDesert =
+        new SerializableDictionary<Species, GameObject>();
+
+    public GameObject treePrefab;
+    public GameObject treePrefabDesert;
     public Dictionary<Species, HashSet<Agent>> gameAgents => InGameAgents;
     public GameObject popup;
     public GameObject cloud;
@@ -26,9 +36,15 @@ public class AgentSpawner : MonoBehaviour, ISerializable {
     };
 
     private List<int> averageChickenSpeed = new List<int>();
-    
     private static bool readFromFile = false;
     private static int grassQuantity, chickenQuantity, foxQuantity;
+
+    void Awake() {
+        if (isDesert) {
+            speciesPrefabs = speciesPrefabsDesert;
+            treePrefab = treePrefabDesert;
+        }
+    }
 
     void Start() {
         foreach (var s in speciesPrefabs)
@@ -40,8 +56,6 @@ public class AgentSpawner : MonoBehaviour, ISerializable {
 
         StartCoroutine(AddDataPoint());
     }
-
-    void Update() {}
 
     public static void AddSpecies(Species species, GameObject gameObject) {
         readFromFile = true;
@@ -59,10 +73,10 @@ public class AgentSpawner : MonoBehaviour, ISerializable {
             for (int i = 0; i < grassQuantity; i++) {
                 speciesPrefabsStatic.TryGetValue(Species.Grass, out var selectedPrefab);
                 if (selectedPrefab != null) {
-                    Vector3 randomVector = new Vector3(Random.Range(-90f, 90f), 40, Random.Range(-90f, 90f)); 
+                    Vector3 randomVector = new Vector3(Random.Range(-90f, 90f), 40, Random.Range(-90f, 90f));
                     Physics.Raycast(randomVector, Vector3.down, out var hit);
                     Quaternion rot = Quaternion.LookRotation(hit.normal, Vector3.forward);
-                    GameObject reference = Instantiate(selectedPrefab, hit.point + hit.normal * 0.05f, rot, this.transform);
+                    GameObject reference = Instantiate(selectedPrefab, hit.point + hit.normal * 0.05f, rot, transform);
                     reference.GetComponent<Agent>().stats = SpeciesFactory.NewAgentStats(Species.Grass);
                     reference.GetComponent<Agent>().worldController = GetComponent<WorldController>();
                     InGameAgents.TryGetValue(Species.Grass, out var x);
@@ -73,10 +87,11 @@ public class AgentSpawner : MonoBehaviour, ISerializable {
             for (int i = 0; i < chickenQuantity; i++) {
                 speciesPrefabsStatic.TryGetValue(Species.Chicken, out var selectedPrefab);
                 if (selectedPrefab != null) {
-                    Vector3 randomVector = new Vector3(Random.Range(-90f, 90f), 40, Random.Range(-90f, 90f)); 
+                    Vector3 randomVector = new Vector3(Random.Range(-90f, 90f), 40, Random.Range(-90f, 90f));
                     Physics.Raycast(randomVector, Vector3.down, out var hit);
                     Debug.Log(hit.point.ToString());
-                    GameObject reference = Instantiate(selectedPrefab, hit.point + hit.normal * 0.05f, selectedPrefab.transform.rotation, this.transform);
+                    GameObject reference = Instantiate(selectedPrefab, hit.point + hit.normal * 0.05f,
+                        selectedPrefab.transform.rotation, transform);
                     reference.GetComponent<Agent>().stats = SpeciesFactory.NewAgentStats(Species.Chicken);
                     reference.GetComponent<Agent>().worldController = GetComponent<WorldController>();
                     InGameAgents.TryGetValue(Species.Chicken, out var x);
@@ -87,10 +102,10 @@ public class AgentSpawner : MonoBehaviour, ISerializable {
             for (int i = 0; i < foxQuantity; i++) {
                 speciesPrefabsStatic.TryGetValue(Species.Fox, out var selectedPrefab);
                 if (selectedPrefab != null) {
-                    Vector3 randomVector = new Vector3(Random.Range(-90f, 90f), 40, Random.Range(-90f, 90f)); 
-                    var raycasthit = Physics.Raycast(randomVector, Vector3.down, out var hit);
+                    Vector3 randomVector = new Vector3(Random.Range(-90f, 90f), 40, Random.Range(-90f, 90f));
+                    Physics.Raycast(randomVector, Vector3.down, out var hit);
                     Quaternion rot = Quaternion.LookRotation(hit.normal, Vector3.forward);
-                    GameObject reference = Instantiate(selectedPrefab, hit.point + hit.normal * 0.05f, rot, this.transform);
+                    GameObject reference = Instantiate(selectedPrefab, hit.point + hit.normal * 0.05f, rot, transform);
                     reference.GetComponent<Agent>().stats = SpeciesFactory.NewAgentStats(Species.Fox);
                     reference.GetComponent<Agent>().worldController = GetComponent<WorldController>();
                     InGameAgents.TryGetValue(Species.Fox, out var x);
@@ -100,10 +115,16 @@ public class AgentSpawner : MonoBehaviour, ISerializable {
         }
     }
 
-    public void AddSpecies(Species species, Vector3 position) {
+    public void AddSpecies(Species species, RaycastHit hit) {
         speciesPrefabs.TryGetValue(species, out var selectedPrefab);
         if (selectedPrefab != null) {
-            GameObject reference = Instantiate(selectedPrefab, position, Quaternion.identity, transform);
+            NavMeshHit closestHit;
+            Vector3 closestHitPosition = hit.point + hit.normal * 0.05f;
+            if (NavMesh.SamplePosition(hit.point + hit.normal * 0.05f, out closestHit, 500, 1)) {
+                closestHitPosition = closestHit.position;
+            }
+
+            GameObject reference = Instantiate(selectedPrefab, closestHitPosition, Quaternion.identity, transform);
             reference.GetComponent<Agent>().stats = SpeciesFactory.NewAgentStats(species);
             reference.GetComponent<Agent>().worldController = GetComponent<WorldController>();
             InGameAgents.TryGetValue(species, out var x);
@@ -146,7 +167,7 @@ public class AgentSpawner : MonoBehaviour, ISerializable {
         }
 
         Terraformation terrain;
-        if (GameObject.Find("Terraformer") != null && 
+        if (GameObject.Find("Terraformer") != null &&
             (terrain = GameObject.Find("Terraformer").GetComponent<Terraformation>()) != null) {
             currentData.addVertices(terrain.GetVertices());
             currentData.addTriangles(terrain.GetTriangles());
@@ -156,6 +177,7 @@ public class AgentSpawner : MonoBehaviour, ISerializable {
     }
 
     private string filePath;
+
     public void WriteData() {
         GameData currentData = GetData();
 
@@ -173,17 +195,18 @@ public class AgentSpawner : MonoBehaviour, ISerializable {
             File.Move(path, newPath);
             path = newPath;
         }
-        
+
         filePath = path;
         if (saveToJson)
             cloud.SetActive(true);
         else
             popup.SetActive(true);
     }
-    
+
     public async void SaveInServer() {
         if (filePath != null) {
-            cloud.GetComponentInChildren<TMPro.TMP_Text>().text = "File saved successfully! Do you want to save it in the cloud?";
+            cloud.GetComponentInChildren<TMPro.TMP_Text>().text =
+                "File saved successfully! Do you want to save it in the cloud?";
             await FTPManager.PostFile(filePath);
         }
     }
@@ -225,7 +248,7 @@ public class AgentSpawner : MonoBehaviour, ISerializable {
 
     public List<int> FetchChickenSizeDataPoints() {
         var sizes = new List<int>();
-        for (int i = 0; i < 10; i++) 
+        for (int i = 0; i < 10; i++)
             sizes.Add(0);
         InGameAgents.TryGetValue(Species.Chicken, out var chickSet);
         foreach (var c in chickSet) {
@@ -243,25 +266,53 @@ public class AgentSpawner : MonoBehaviour, ISerializable {
         GameObject reference = Instantiate(selectedPrefab, ag1.transform.position, ag1.transform.rotation, transform);
         reference.GetComponent<Agent>().stats = ags;
         reference.GetComponent<Agent>().worldController = ag1.worldController;
-        // reference.GetComponent<Agent>().StopAllCoroutines();
         InGameAgents.TryGetValue(species, out var x);
         x.Add(reference.GetComponent<Agent>());
     }
 
+    private int trees = 0;
     public void AsexualReproduce(Agent ag1, Species species) {
+        if (ag1.gameObject.CompareTag("Tree") && trees > 15)
+            return;
+        
         AgentStats ags = SpeciesFactory.NewAgentStats(ag1.stats, ag1.stats, species);
         speciesPrefabs.TryGetValue(species, out var selectedPrefab);
         Vector3 pos = ag1.transform.position;
 
         Vector3 randomVector = new Vector3(pos.x + Random.Range(-3f, 3f), 40, pos.z + Random.Range(-3f, 3f));
+        if (ag1.gameObject.CompareTag("Tree")) 
+            randomVector = new Vector3(pos.x + Random.Range(-10f, 10f), 40, pos.z + Random.Range(-10f, 10f));
 
-        var raycasthit = Physics.Raycast(randomVector, Vector3.down, out var hit);
-        if (raycasthit) {
-            GameObject reference = Instantiate(selectedPrefab, hit.point, ag1.transform.rotation, transform);
+        var raycastHit = Physics.Raycast(randomVector, Vector3.down, out var hit);
+        if (raycastHit) {
+            NavMeshHit closestHit;
+            Vector3 closestHitPosition = hit.point + hit.normal * 0.05f;
+            if (NavMesh.SamplePosition(hit.point + hit.normal * 0.05f, out closestHit, 500, 1)) {
+                closestHitPosition = closestHit.position;
+            }
+
+            GameObject reference = Instantiate(ag1.gameObject, closestHitPosition, ag1.transform.rotation, transform);
             reference.GetComponent<Agent>().stats = ags;
             reference.GetComponent<Agent>().worldController = ag1.worldController;
+            if (ag1.gameObject.CompareTag("Tree")) {
+                trees++;
+                return;
+            }
+
             InGameAgents.TryGetValue(species, out var x);
             x.Add(reference.GetComponent<Agent>());
         }
+    }
+
+    public void AddTree(RaycastHit hit) {
+        NavMeshHit closestHit;
+        Vector3 closestHitPosition = hit.point + hit.normal * 0.05f;
+        if (NavMesh.SamplePosition(hit.point + hit.normal * 0.05f, out closestHit, 500, 1)) {
+            closestHitPosition = closestHit.position;
+        }
+
+        GameObject reference = Instantiate(treePrefab, closestHitPosition, Quaternion.identity, transform);
+        reference.GetComponent<Agent>().stats = SpeciesFactory.NewAgentStats(Species.Grass);
+        reference.GetComponent<Agent>().worldController = GetComponent<WorldController>();
     }
 }

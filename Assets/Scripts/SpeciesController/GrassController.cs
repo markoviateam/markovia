@@ -2,7 +2,9 @@ using System;
 using UnityEngine;
 using System.Runtime.Serialization;
 
-public class GrassController : NotMovableAgent {
+public class GrassController : NotMovableAgent
+{
+    
     public override void drink() {
         throw new NotImplementedException();
     }

@@ -55,7 +55,6 @@ public abstract class Agent : MonoBehaviour, IAgentController, ISerializable {
         this.age = age;
     }
 
-
     public abstract void GetObjectData(SerializationInfo info, StreamingContext context);
     public abstract GameObject getBestWaterPosition();
     public abstract Agent getBestFoodPosition();

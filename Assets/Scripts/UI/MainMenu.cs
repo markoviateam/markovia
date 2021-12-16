@@ -20,6 +20,18 @@ public class MainMenu : MonoBehaviour {
                 AgentSpawner.AddSpecies(pair.Key, pair.Value);
         }
         AgentSpawner.AddSpeciesQuantity(grassQty, chickenQty, foxQty);
+    }
+
+    public void DesertBiome() {
+        AgentSpawner.isDesert = true;
+        LoadScene();
+    }
+    public void PlainsBiome() {
+        AgentSpawner.isDesert = false;
+        LoadScene();
+    }
+
+    private void LoadScene() {
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 1);
     }
 
@@ -47,7 +59,7 @@ public class MainMenu : MonoBehaviour {
             }
         }
         catch (ArgumentException) {
-            popup.GetComponentInChildren<TMPro.TMP_Text>().text = "Invalid json";
+            popup.GetComponentInChildren<TMP_Text>().text = "Invalid json";
             ShowPopup();
             return;
         }
@@ -80,10 +92,19 @@ public class MainMenu : MonoBehaviour {
         }
 
         PlayGame();
+        // TODO: Add biome to file.
+        LoadScene();
     }
 
-    public async void LoadServerFile(int index) {
-        await FTPManager.GetFile(fileList[index]);
+    public void SaveFileIndex(int index) {
+        fileIndex = index;
+    }
+
+    public async void LoadServerFile() {
+        if (fileList.Count == 0)
+            return;
+
+        await FTPManager.GetFile(fileList[fileIndex]);
         var path = Application.dataPath + "/Save/tempLoad.json";
         StartFromFile(path);
     }
@@ -91,9 +112,10 @@ public class MainMenu : MonoBehaviour {
     public void LoadLocalFile() {
         var path = StandaloneFileBrowser.OpenFilePanel("Open File", "", "", false);
         if (path == null || path.Length == 0 || string.Compare(path[0], string.Empty, StringComparison.Ordinal) == 0) {
-            popup.GetComponentInChildren<TMPro.TMP_Text>().text = "You must choose a json file";
+            popup.GetComponentInChildren<TMP_Text>().text = "You must choose a json file";
             ShowPopup();
         }
+
         StartFromFile(path[0]);
     }
 
@@ -105,19 +127,27 @@ public class MainMenu : MonoBehaviour {
     public GameObject loadingText;
     public GameObject fileDropdownGameObject;
     private List<string> fileList = new List<string>();
+    private int fileIndex = 0;
 
     public async void Awake() {
+        popup.SetActive(false);
+        loadingText.GetComponent<TMP_Text>().text = "Loading...";
+        fileDropdownGameObject.GetComponent<TMP_Dropdown>().ClearOptions();
         try {
             await FTPManager.GetFilesName(fileList);
         } catch (Exception exception) {
-            popup.GetComponentInChildren<TMPro.TMP_Text>().text = "Couldn't connect to server! Check your connection.";
-            ShowPopup();
+            if (popup != null) {
+                popup.GetComponentInChildren<TMP_Text>().text = "Couldn't connect to server! Check your connection.";
+                ShowPopup();
+            }
         }
+
+        if (loadingText == null || fileDropdownGameObject == null)
+            return;
         loadingText.GetComponent<TMP_Text>().text = "";
         fileDropdown = fileDropdownGameObject.GetComponent<TMP_Dropdown>();
         fileDropdown.ClearOptions();
         fileDropdown.AddOptions(fileList);
         fileDropdown.RefreshShownValue();
     }
-
 }

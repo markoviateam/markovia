@@ -53,7 +53,8 @@ public static class StateExtensions {
                     }
                     yield return null;
                 } while (agent.IsSolving() && agent.stats.GetNeed(Need.Hunger) > 0 && food != null);
-                agent.ResetCoroutines();
+                agent.FinishSolvingState();
+                // agent.ResetCoroutines();
                 
                 break; 
             case State.LookForWater:
@@ -75,7 +76,8 @@ public static class StateExtensions {
                     }
                     yield return null;
                 } while (agent.IsSolving() && agent.stats.GetNeed(Need.Thirst) > 0);
-                agent.ResetCoroutines();
+                // agent.ResetCoroutines();
+                agent.FinishSolvingState();
 
                 break;
             case State.Stealth:
@@ -86,7 +88,8 @@ public static class StateExtensions {
                     agent.stats.UpdateNeed(Need.ReproductiveUrge, 0.015f * Time.deltaTime * WorldController.TickSpeed * 3f);
                     yield return null;
                 } while (agent.IsSolving());
-                agent.ResetCoroutines();
+                agent.FinishSolvingState();
+                // agent.ResetCoroutines();
                 
                 break;
             case State.Wander:
@@ -94,7 +97,7 @@ public static class StateExtensions {
                 int x = Random.Range(-100, 100);
                 int z = Random.Range(-100, 100);
                 Vector3 to = new Vector3(x, 50f, z);
-                var raycasthit = Physics.Raycast(to, Vector3.down, out var hit);
+                Physics.Raycast(to, Vector3.down, out var hit);
                 agent.moveTo(hit.point);
                 
                 do {
@@ -109,7 +112,8 @@ public static class StateExtensions {
                     }
                     yield return null;
                 } while (agent.IsSolving());
-                agent.ResetCoroutines();
+                agent.FinishSolvingState();
+                // agent.ResetCoroutines();
                 
                 break;
             case State.Sleep:
@@ -123,12 +127,12 @@ public static class StateExtensions {
                     agent.stats.UpdateNeed(Need.Sleep, -0.1f * Time.deltaTime * WorldController.TickSpeed);
                     yield return null;
                 } while (agent.IsSolving() && agent.stats.GetNeed(Need.Sleep) > 0f);
-                agent.ResetCoroutines();
+                agent.FinishSolvingState();
+                // agent.ResetCoroutines();
                 
                 break;
             case State.Reproduce:
                 agent.BeginSolvingState();
-                Debug.Log("Se reproduce");
                 
                 Agent mate = agent.findMate();
                 if (mate == null || mate.gameObject == null) {
@@ -173,6 +177,7 @@ public static class StateExtensions {
                 }
                 
                 agent.worldController.GetComponent<AgentSpawner>().AsexualReproduce(agent, agent.GetSpecies());
+                // agent.FinishSolvingState();
                 agent.ResetCoroutines();
                 
                 break;

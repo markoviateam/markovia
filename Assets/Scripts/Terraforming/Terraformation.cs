@@ -4,17 +4,23 @@ using UnityEngine.AI;
 public class Terraformation : MonoBehaviour {
     [SerializeField] private GameObject smoke;
 
-    [SerializeField] private WorldController wc; 
+    [SerializeField] private WorldController wc;
     public int xSize = 100;
     public int zSize = 100;
     public float scale = 10f;
 
-    private readonly Color[] colors = {
+    private Color[] colors = {
         new Color(121 / 255f, 181 / 255f, 103 / 255f),
         new Color(92 / 255f, 73 / 255f, 39 / 255f)
     };
 
+    private Color[] desertColors = {
+        new Color(252 / 255f, 210 / 255f, 127 / 255f),
+        new Color(249 / 255f, 203 / 255f, 112 / 255f)
+    };
+
     private Mesh mesh;
+
     //TODO mirar que hacer con esto de que estan public
     public int[] triangles;
     public Vector3[] vertices;
@@ -23,11 +29,12 @@ public class Terraformation : MonoBehaviour {
     public float MINTerrainHeight { get; private set; } = Mathf.Infinity;
 
     private void Start() {
+        if (AgentSpawner.isDesert) colors = desertColors;
         mesh = new Mesh();
         GetComponent<MeshFilter>().mesh = mesh;
 
         CreateShape();
-        if(JsonManager.initializationData!=null){
+        if (JsonManager.initializationData != null) {
             JsonManager.initializationData.getVertices(this.vertices);
             JsonManager.initializationData.getTriangles(this.triangles);
         }
@@ -48,11 +55,11 @@ public class Terraformation : MonoBehaviour {
         UpdateMesh();
     }
 
-    public int[] GetTriangles(){
+    public int[] GetTriangles() {
         return this.triangles;
     }
 
-    public Vector3[] GetVertices(){
+    public Vector3[] GetVertices() {
         return this.vertices;
     }
 
@@ -82,8 +89,10 @@ public class Terraformation : MonoBehaviour {
                     y = 0;
                     var mult = 1.35f;
                     if (x % 4 == 0 || z % 4 == 0) {
-                        Instantiate(smoke, new Vector3(x * scale * mult, 0, z * scale * mult), smoke.transform.rotation, transform);
-                        Instantiate(smoke, new Vector3(x * scale * mult * mult, 0, z * scale * mult * mult), smoke.transform.rotation, transform);
+                        Instantiate(smoke, new Vector3(x * scale * mult, 0, z * scale * mult), smoke.transform.rotation,
+                            transform);
+                        Instantiate(smoke, new Vector3(x * scale * mult * mult, 0, z * scale * mult * mult),
+                            smoke.transform.rotation, transform);
                     }
                 }
 
