@@ -21,7 +21,6 @@ public class Terraformation : MonoBehaviour {
 
     private Mesh mesh;
 
-    //TODO mirar que hacer con esto de que estan public
     public int[] triangles;
     public Vector3[] vertices;
 
@@ -34,11 +33,12 @@ public class Terraformation : MonoBehaviour {
         GetComponent<MeshFilter>().mesh = mesh;
 
         CreateShape();
+        // TODO: Usar esto, se está pisando ahora... Salva ya te voy a agarrar
         if (JsonManager.initializationData != null) {
-            JsonManager.initializationData.getVertices(this.vertices);
-            JsonManager.initializationData.getTriangles(this.triangles);
+            JsonManager.initializationData.getVertices(vertices);
+            JsonManager.initializationData.getTriangles(triangles);
         }
-
+        
         CreateShape();
         transform.position = Vector3.zero;
         UpdateMeshHeights();

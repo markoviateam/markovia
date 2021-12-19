@@ -8,6 +8,7 @@ public class GameData {
     public string triangles = string.Empty;
     public int verticesCount;
     public string vertices = string.Empty;
+    public bool isDesert;
 
     public void addAgent(GameObject agent) {
         var agentData = agent.GetComponent<Agent>().ToString();

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Net.Sockets;
+using System.Timers;
 using SFB;
 using TMPro;
 using UnityEngine;
@@ -32,6 +33,7 @@ public class MainMenu : MonoBehaviour {
     }
 
     private void LoadScene() {
+        Time.timeScale = 1;
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 1);
     }
 
@@ -92,7 +94,6 @@ public class MainMenu : MonoBehaviour {
         }
 
         PlayGame();
-        // TODO: Add biome to file.
         LoadScene();
     }
 

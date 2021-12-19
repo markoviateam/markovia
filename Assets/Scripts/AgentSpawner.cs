@@ -40,6 +40,10 @@ public class AgentSpawner : MonoBehaviour, ISerializable {
     private static int grassQuantity, chickenQuantity, foxQuantity;
 
     void Awake() {
+        if (JsonManager.initializationData != null) {
+            isDesert = JsonManager.initializationData.isDesert;
+        }
+
         if (isDesert) {
             speciesPrefabs = speciesPrefabsDesert;
             treePrefab = treePrefabDesert;
@@ -172,7 +176,8 @@ public class AgentSpawner : MonoBehaviour, ISerializable {
             currentData.addVertices(terrain.GetVertices());
             currentData.addTriangles(terrain.GetTriangles());
         }
-
+        currentData.isDesert = isDesert;
+        
         return currentData;
     }
 
