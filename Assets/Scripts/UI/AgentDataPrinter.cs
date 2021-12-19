@@ -40,37 +40,56 @@ public class AgentDataPrinter : MonoBehaviour {
     }
 
     private void DisplayData() {
-        ageSlider.value = (float) agent.GetAge() / 100f;
-        sleepSlider.value = (float) agent.stats.GetNeed(Need.Sleep);
-        hungerSlider.value = (float) agent.stats.GetNeed(Need.Hunger);
-        thirstSlider.value = (float) agent.stats.GetNeed(Need.Thirst);
-        repSlider.value = (float) agent.stats.GetNeed(Need.ReproductiveUrge);
         agentSpecies.GetComponent<Text>().text = agent.ToString() switch {
             "Fox" => "Secondary consumer",
             "Chicken" => "Primary consumer",
             "Grass" => "Producer",
             _ => agentSpecies.GetComponent<Text>().text
         };
+        
+        ageSlider.value = (float) agent.GetAge() / 100f;
+        repSlider.value = (float) agent.stats.GetNeed(Need.ReproductiveUrge);
         age.GetComponent<Text>().text = "Age: " + agent.GetAge().Round(0);
-        sleep.GetComponent<Text>().text = "Sleep: " + agent.stats.GetNeed(Need.Sleep).Round(5);
-        hunger.GetComponent<Text>().text = "Hunger: " + agent.stats.GetNeed(Need.Hunger).Round(5);
         rep.GetComponent<Text>().text = "Rep. Urge: " + agent.stats.GetNeed(Need.ReproductiveUrge).Round(5);
-        thirst.GetComponent<Text>().text = "Thirst: " + agent.stats.GetNeed(Need.Thirst).Round(5);
+        if (agent.ToString() != "Grass") {
+            sleepSlider.value = (float) agent.stats.GetNeed(Need.Sleep);
+            hungerSlider.value = (float) agent.stats.GetNeed(Need.Hunger);
+            thirstSlider.value = (float) agent.stats.GetNeed(Need.Thirst);
+            sleep.GetComponent<Text>().text = "Sleep: " + agent.stats.GetNeed(Need.Sleep).Round(5);
+            hunger.GetComponent<Text>().text = "Hunger: " + agent.stats.GetNeed(Need.Hunger).Round(5);
+            thirst.GetComponent<Text>().text = "Thirst: " + agent.stats.GetNeed(Need.Thirst).Round(5);
+        } else {
+            sleep.GetComponent<Text>().enabled = false;
+            hunger.GetComponent<Text>().enabled = false;
+            thirst.GetComponent<Text>().enabled = false;
+            sleepSlider.gameObject.SetActive(false);
+            hungerSlider.gameObject.SetActive(false);
+            thirstSlider.gameObject.SetActive(false);
+        }
         agentData.SetActive(true);
         Time.timeScale = 0;
     }
 
-    public void SaveData() {
+    private void SaveData() {
         float age = ageSlider.value * 100f;
-        float sleep = sleepSlider.value;
-        float hunger = hungerSlider.value;
-        float thirst = thirstSlider.value;
         float rep = repSlider.value;
         agent.stats.SetNeed(Need.ReproductiveUrge, rep);
-        agent.stats.SetNeed(Need.Hunger, hunger);
-        agent.stats.SetNeed(Need.Thirst, thirst);
-        agent.stats.SetNeed(Need.Sleep, sleep);
         agent.SetAge(age);
+        if (agent.ToString() != "Grass") {
+            float sleep = sleepSlider.value;
+            float hunger = hungerSlider.value;
+            float thirst = thirstSlider.value;
+            agent.stats.SetNeed(Need.Hunger, hunger);
+            agent.stats.SetNeed(Need.Thirst, thirst);
+            agent.stats.SetNeed(Need.Sleep, sleep);
+        } else {
+            sleep.GetComponent<Text>().enabled = true;
+            hunger.GetComponent<Text>().enabled = true;
+            thirst.GetComponent<Text>().enabled = true;
+            sleepSlider.gameObject.SetActive(true);
+            hungerSlider.gameObject.SetActive(true);
+            thirstSlider.gameObject.SetActive(true);
+        }
     }
 
     public void AgeSlider(float newAge) {
