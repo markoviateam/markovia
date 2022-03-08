@@ -116,7 +116,7 @@ jobs:
       - uses: game-ci/unity-builder@v2
         with:
           targetPlatform: ${{ matrix.targetPlatform }}
-          customParameters: "-myParameter myValue -myBoolean -ThirdParameter andItsValue"
+          buildName: markovia
           allowDirtyBuild: true
       - uses: actions/upload-artifact@v2
         with:
