@@ -6,19 +6,19 @@
 
 ### Linux
 
-1. Download from [releases](https://github.com/markoviateam/markovia/releases) the file called `Build-StandaloneLinux64.zip`.
+1. Download from [releases](https://github.com/markoviateam/markovia/releases) the file called `Build-Linux64.zip`.
 2. Unzip it.
-3. Run `StandaloneLinux64`.
+3. Run `markovia` executable.
 
 ### MacOS
 
-1. Download from [releases](https://github.com/markoviateam/markovia/releases) the file called `Build-StandaloneOSX.zip`.
+1. Download from [releases](https://github.com/markoviateam/markovia/releases) the file called `Build-OSX.zip`.
 2. Unzip it.
 3. Move it to the `Applications` folder.
-4. Run `StandaloneOSX`.
+4. Open `markovia` app.
 
 ### Windows
 
-1. Download from [releases](https://github.com/markoviateam/markovia/releases) the file called `Build-StandaloneWindows64.zip`.
+1. Download from [releases](https://github.com/markoviateam/markovia/releases) the file called `Build-Windows64.zip`.
 2. Unzip it.
-3. Run `StandaloneWindows64.exe`.
+3. Run `markovia.exe`.
